@@ -4,7 +4,8 @@ const { userByEmail,
         userByID, 
         updateUser, 
         deleteUser, 
-        getUserAll
+        getUserAll,
+        paginationUser
         } = require("../contollers/userController");
 
 router.get("/user/all", getUserAll);
@@ -16,5 +17,7 @@ router.get("/user/id/:id", userByID);
 router.put("/user/id/:id", updateUser);
 
 router.delete("/user/id/:id", deleteUser);
+
+router.get("/user", paginationUser);
 
 module.exports = router;

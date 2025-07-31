@@ -121,6 +121,35 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const paginationUser = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
-module.exports = { getUserAll, userByEmail, userByID, updateUser, deleteUser};
+    try {
+        const { count, rows } = await User.findAndCountAll ({
+            limit,
+            offset,
+            order: [[ 'createdAt', 'DESC' ]],
+        });
+
+        res.json ({
+            currentPage: page,
+            totalPage: Math.ceil( count / limit ),
+            totalRecords: count,
+            user: rows
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+module.exports = { getUserAll, 
+                userByEmail, 
+                userByID, 
+                updateUser, 
+                deleteUser, 
+                paginationUser};
 

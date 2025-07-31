@@ -110,4 +110,74 @@ const deleteDowntime = async (req, res) => {
     }
 };
 
-module.exports = { getDowntimeAll, getDowntimePC_IDAll, downtimeLog, getDowntimeID, getDowntimePC_ID, deleteDowntime }; 
+const paginationDowntime = async (req, res) => {
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    try {
+        const { count, rows } = await Downtime.findAndCountAll({
+            limit,
+            offset,
+            order: [[ 'createdAt', 'DESC' ]],
+        });
+
+        res.json({
+            currentPage: page,
+            totalPage: Math.ceil( count / limit ),
+            totalRecords: count,
+            downtime: rows
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message});
+    }
+};
+
+const paginationDowntimePC_ID = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const pcID = req.params.pc_id;
+
+    try {
+        const pc_id = await Downtime.findOne({
+            where: {pc_id: req.params.pc_id},
+        });
+
+        if (!pc_id) {
+            return res.status(404).json({ message: "PC_ID not found!"});
+        }
+
+        const { count, rows } = await Downtime.findAndCountAll({
+            limit,
+            offset,
+            order: [[ 'createdAt', 'DESC' ]],
+            where: { pc_id: pcID},
+        });
+
+        res.json ({
+            currentPage: page,
+            totalPage: Math.ceil( count / limit ),
+            totalRecords: count,
+            downtime: rows,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+module.exports = { getDowntimeAll, 
+                getDowntimePC_IDAll, 
+                downtimeLog, 
+                getDowntimeID, 
+                getDowntimePC_ID, 
+                deleteDowntime, 
+                paginationDowntime,          
+                paginationDowntimePC_ID}; 
